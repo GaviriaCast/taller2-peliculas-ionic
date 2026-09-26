@@ -3,6 +3,15 @@
     <ion-header :translucent="true">
       <ion-toolbar color="primary">
         <ion-title>Catálogo de Películas</ion-title>
+        <ion-buttons slot="end">
+          <ion-button v-if="auth.isAuthenticated" router-link="/perfil" aria-label="Mi perfil">
+            <ion-icon slot="icon-only" :icon="personCircleOutline"></ion-icon>
+          </ion-button>
+          <ion-button v-else router-link="/login">
+            <ion-icon slot="start" :icon="logInOutline"></ion-icon>
+            Entrar
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
       <ion-toolbar color="primary">
         <ion-searchbar
@@ -53,7 +62,7 @@
           v-for="movie in movies"
           :key="movie.id"
           :movie="movie"
-          :can-edit="true"
+          :can-edit="auth.isAuthenticated"
           @delete="confirmDeleteMovie"
           @edit="handleEditMovie"
         />
@@ -69,6 +78,13 @@
           loading-text="Cargando más películas..."
         ></ion-infinite-scroll-content>
       </ion-infinite-scroll>
+
+      <!-- Botón flotante para crear (solo con sesión iniciada) -->
+      <ion-fab v-if="auth.isAuthenticated" slot="fixed" vertical="bottom" horizontal="end">
+        <ion-fab-button aria-label="Nueva película" @click="openMovieForm()">
+          <ion-icon :icon="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
     </ion-content>
   </ion-page>
 </template>
@@ -89,16 +105,30 @@ import {
   IonSpinner,
   IonIcon,
   IonButton,
+  IonButtons,
+  IonFab,
+  IonFabButton,
   alertController,
+  modalController,
   toastController,
   type InfiniteScrollCustomEvent,
   type RefresherCustomEvent,
   type SearchbarCustomEvent,
 } from '@ionic/vue';
-import { filmOutline, alertCircleOutline } from 'ionicons/icons';
+import {
+  filmOutline,
+  alertCircleOutline,
+  add,
+  personCircleOutline,
+  logInOutline,
+} from 'ionicons/icons';
 import MovieCard from '../components/MovieCard.vue';
+import MovieForm from '../components/MovieForm.vue';
+import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
 import type { Movie, PaginationMeta } from '../types/movie';
+
+const auth = useAuthStore();
 
 const movies = ref<Movie[]>([]);
 const loading = ref<boolean>(true);
@@ -255,8 +285,37 @@ const deleteMovie = async (id: number) => {
   }
 };
 
+// Creación y edición con ion-modal: MovieForm hace el POST/PATCH y
+// devuelve la película guardada con el rol 'confirm'
+const openMovieForm = async (movie?: Movie) => {
+  const modal = await modalController.create({
+    component: MovieForm,
+    componentProps: { movie: movie ?? null },
+  });
+  await modal.present();
+
+  const { data, role } = await modal.onWillDismiss<Movie>();
+  if (role !== 'confirm' || !data) return;
+
+  if (movie) {
+    movies.value = movies.value.map((m) => (m.id === data.id ? data : m));
+  } else {
+    // La API ordena por fecha de creación: se recarga desde la página 1
+    // para que la nueva quede de primera sin descuadrar el scroll infinito
+    fetchInitialMovies();
+  }
+
+  const toast = await toastController.create({
+    message: movie ? 'Película actualizada correctamente' : 'Película creada correctamente',
+    duration: 2000,
+    color: 'success',
+    position: 'bottom',
+  });
+  await toast.present();
+};
+
 const handleEditMovie = (movie: Movie) => {
-  console.log('Editar película (preparado para modal de Daniel):', movie);
+  openMovieForm(movie);
 };
 
 onMounted(() => {
