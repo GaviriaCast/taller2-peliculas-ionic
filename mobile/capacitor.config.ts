@@ -1,9 +1,15 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'mobile',
-  webDir: 'dist'
+  appId: 'co.edu.upb.peliculas',
+  appName: 'Películas',
+  webDir: 'dist',
+  server: {
+    // La API local corre en http, así que el WebView de Android también
+    // se sirve en http para evitar el bloqueo por contenido mixto
+    androidScheme: 'http',
+    cleartext: true,
+  },
 };
 
 export default config;
