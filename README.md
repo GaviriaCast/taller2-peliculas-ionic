@@ -1,11 +1,12 @@
-# 🎬 Catálogo de Películas — Taller #1
+# 🎬 Catálogo de Películas — Talleres #1 y #2
 
-CRUD completo de películas con **NestJS + Prisma 7 + SQLite** en el backend y **Vue 3 + Vite** en el frontend, con autenticación por **JWT**.
+CRUD completo de películas con **NestJS + Prisma 7 + SQLite** en el backend, **Vue 3 + Vite** en el frontend web y **Ionic Vue + Capacitor** en el cliente móvil, con autenticación por **JWT**.
 
 | Proyecto | Carpeta | Stack | Puerto |
 | --- | --- | --- | --- |
 | API REST | [`backend/`](backend) | NestJS 12, Prisma 7, SQLite, Passport JWT | `3000` |
 | Interfaz web | [`frontend/`](frontend) | Vue 3, Vite, Vue Router, Pinia, Axios | `5173` |
+| App móvil (Taller #2) | [`mobile/`](mobile) | Ionic Vue, Capacitor, Pinia, Axios | `8100` |
 
 ---
 
@@ -72,6 +73,25 @@ npm run dev
 ```
 
 La interfaz queda en **http://localhost:5173** y consume la API mediante `VITE_API_URL`.
+
+---
+
+## 3. App móvil (Ionic)
+
+Antes de levantarla, agrega el puerto de Ionic a `CORS_ORIGIN` en `backend/.env` y reinicia la API:
+
+```env
+CORS_ORIGIN="http://localhost:5173,http://localhost:8100,capacitor://localhost,http://localhost"
+```
+
+```bash
+cd mobile
+npm install
+cp .env.example .env   # VITE_API_URL=http://localhost:3000/api
+ionic serve            # o: npm run dev -- --port 8100
+```
+
+La app queda en **http://localhost:8100**. Los pasos para apuntarla a otra API y para compilarla en Android están en [`mobile/README.md`](mobile/README.md).
 
 ---
 
@@ -149,5 +169,6 @@ model User {
 │       ├── prisma/             # PrismaService (driver adapter SQLite)
 │       └── main.ts
 ├── frontend/                   # Aplicación Vue 3
+├── mobile/                     # App Ionic Vue + Capacitor (Taller #2)
 └── docs/API.md                 # Contrato detallado de la API
 ```
