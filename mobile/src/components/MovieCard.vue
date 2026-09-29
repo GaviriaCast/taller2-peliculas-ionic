@@ -1,5 +1,5 @@
 <template>
-  <ion-card class="movie-card">
+  <ion-card class="movie-card" button @click="$emit('open', movie)">
     <div class="poster-container">
       <img
         :src="movie.imagen"
@@ -31,7 +31,7 @@
           fill="clear"
           size="small"
           color="primary"
-          @click="$emit('edit', movie)"
+          @click.stop="$emit('edit', movie)"
         >
           <ion-icon slot="start" :icon="createOutline"></ion-icon>
           Editar
@@ -41,7 +41,7 @@
           fill="clear"
           size="small"
           color="danger"
-          @click="$emit('delete', movie)"
+          @click.stop="$emit('delete', movie)"
         >
           <ion-icon slot="start" :icon="trashOutline"></ion-icon>
           Eliminar
@@ -72,6 +72,7 @@ defineProps<{
 defineEmits<{
   (e: 'delete', movie: Movie): void;
   (e: 'edit', movie: Movie): void;
+  (e: 'open', movie: Movie): void;
 }>();
 
 const handleImageError = (event: Event) => {

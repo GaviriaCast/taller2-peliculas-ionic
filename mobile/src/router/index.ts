@@ -14,6 +14,11 @@ const routes: Array<RouteRecordRaw> = [
     component: MoviesPage,
   },
   {
+    path: '/movies/:id',
+    name: 'MovieDetail',
+    component: () => import('../views/MovieDetailView.vue'),
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/LoginView.vue'),

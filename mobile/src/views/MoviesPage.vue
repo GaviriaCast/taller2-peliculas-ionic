@@ -65,6 +65,7 @@
           :can-edit="auth.isAuthenticated"
           @delete="confirmDeleteMovie"
           @edit="handleEditMovie"
+          @open="openMovieDetail"
         />
       </div>
 
@@ -90,7 +91,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import {
   IonPage,
   IonHeader,
@@ -125,10 +127,13 @@ import {
 import MovieCard from '../components/MovieCard.vue';
 import MovieForm from '../components/MovieForm.vue';
 import { useAuthStore } from '../stores/auth';
+import { useMovieChangesStore } from '../stores/movies';
 import api from '../services/api';
 import type { Movie, PaginationMeta } from '../types/movie';
 
 const auth = useAuthStore();
+const router = useRouter();
+const changes = useMovieChangesStore();
 
 const movies = ref<Movie[]>([]);
 const loading = ref<boolean>(true);
@@ -317,6 +322,27 @@ const openMovieForm = async (movie?: Movie) => {
 const handleEditMovie = (movie: Movie) => {
   openMovieForm(movie);
 };
+
+const openMovieDetail = (movie: Movie) => {
+  router.push(`/movies/${movie.id}`);
+};
+
+// Cambios hechos desde la vista de detalle
+watch(
+  () => changes.updated,
+  (movie) => {
+    if (!movie) return;
+    movies.value = movies.value.map((m) => (m.id === movie.id ? movie : m));
+  }
+);
+
+watch(
+  () => changes.deletedId,
+  (id) => {
+    if (id == null) return;
+    movies.value = movies.value.filter((m) => m.id !== id);
+  }
+);
 
 onMounted(() => {
   fetchInitialMovies();
