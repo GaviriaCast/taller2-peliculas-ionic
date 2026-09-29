@@ -6,6 +6,7 @@ Cliente móvil del catálogo de películas. Reutiliza la misma API de NestJS del
 | --- | --- |
 | Navegación | `@ionic/vue-router` con `ion-router-outlet`, páginas con `ion-page`, `ion-header` y `ion-content` |
 | Listado | `GET /movies` con tarjetas `ion-card` y recarga con `ion-refresher` |
+| Detalle | Al tocar una tarjeta se abre `/movies/:id` (`GET /movies/:id`) con póster, datos y acciones de editar/eliminar |
 | Búsqueda | `ion-searchbar` con debounce, envía `?search=` a la API |
 | Paginación | `ion-infinite-scroll` pidiendo `?page=` hasta `totalPages` |
 | Crear / editar | `MovieForm.vue` dentro de un `ion-modal` (`modalController`), hace `POST` o `PATCH` |
@@ -65,9 +66,10 @@ El seed del backend crea `demo@peliculas.com` / `demo1234`. También puedes crea
 ## 3. Flujo de la app
 
 1. **Catálogo** (`/movies`): es público. Tiene búsqueda, scroll infinito y la opción de deslizar hacia abajo para recargar.
-2. **Entrar** (botón de la barra): inicia sesión o regístrate. El token queda guardado con Capacitor Preferences, así que la sesión sigue activa después de recargar o cerrar la app.
-3. Con sesión iniciada aparecen el botón flotante **+** (crear), **Editar** y **Eliminar** en cada tarjeta.
-4. **Mi perfil** (`/perfil`, ícono de usuario): revalida el token con `GET /auth/me` y permite cerrar sesión.
+2. **Detalle** (`/movies/:id`): toca cualquier tarjeta para ver la película completa. Con sesión, desde ahí también se edita o elimina.
+3. **Entrar** (botón de la barra): inicia sesión o regístrate. El token queda guardado con Capacitor Preferences, así que la sesión sigue activa después de recargar o cerrar la app.
+4. Con sesión iniciada aparecen el botón flotante **+** (crear), **Editar** y **Eliminar** en cada tarjeta.
+5. **Mi perfil** (`/perfil`, ícono de usuario): revalida el token con `GET /auth/me` y permite cerrar sesión.
 
 > En el navegador, Capacitor Preferences se guarda en `localStorage` con el prefijo `CapacitorStorage.`; en Android usa `SharedPreferences` nativo. El código de la app nunca usa `localStorage` directamente.
 
@@ -106,11 +108,14 @@ mobile/src
 ├── services/
 │   ├── api.ts             # Axios + interceptores (Bearer y 401)
 │   └── session.ts         # Lectura/escritura en Capacitor Preferences
-├── stores/auth.ts         # Store de Pinia: login, register, logout, fetchMe
+├── stores/
+│   ├── auth.ts            # Store de Pinia: login, register, logout, fetchMe
+│   └── movies.ts          # Avisa al catálogo los cambios hechos desde el detalle
 ├── types/                 # Tipos de Movie y User
 ├── utils/errors.ts        # Mensajes de error de la API
 └── views/
     ├── MoviesPage.vue     # Catálogo
+    ├── MovieDetailView.vue # Detalle de una película
     ├── LoginView.vue
     ├── RegisterView.vue
     └── ProfileView.vue
