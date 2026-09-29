@@ -75,6 +75,8 @@ El seed del backend crea `demo@peliculas.com` / `demo1234`. También puedes crea
 
 Necesitas Android Studio con un SDK y un emulador (o un celular con depuración USB).
 
+> ⚠️ **Java:** la plantilla de Capacitor usa Gradle 8.14, que **no funciona con Java 25** (el que trae Android Studio). Usa **JDK 21**: en Android Studio ve a *Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK* y elige un JDK 21, o desde la terminal instala `brew install openjdk@21` y exporta `JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home`.
+
 ```bash
 cd mobile
 # en .env: VITE_API_URL=http://10.0.2.2:3000/api
@@ -82,6 +84,13 @@ npm run build
 npx cap add android     # solo la primera vez
 npx cap sync android
 npx cap open android    # abre Android Studio, luego Run ▶
+```
+
+También puedes compilar e instalar sin abrir Android Studio (con el emulador ya encendido):
+
+```bash
+cd android && ./gradlew assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
 `capacitor.config.ts` sirve el WebView en `http` (`androidScheme: 'http'`) para que el emulador pueda consumir la API local, que corre en `http`.
